@@ -21,6 +21,7 @@
             --secondary-color: #3f37c9;
             --success-color: #4cc9f0;
             --danger-color: #f72585;
+            --critical-color: #d90429;
             --warning-color: #f8961e;
             --info-color: #4895ef;
             --dark-color: #212529;
@@ -91,6 +92,7 @@
         }
         
         .expired { background-color: rgba(247, 37, 133, 0.1); }
+        .critical { background-color: rgba(217, 4, 41, 0.1); }
         .urgent  { background-color: rgba(248, 150, 30, 0.1); }
         .soon    { background-color: rgba(72, 149, 239, 0.1); }
         .normal  { background-color: rgba(76, 201, 240, 0.1); }
@@ -130,6 +132,7 @@
         }
         
         .status-indicator.expired { background-color: var(--danger-color); }
+        .status-indicator.critical { background-color: var(--critical-color); }
         .status-indicator.urgent { background-color: var(--warning-color); }
         .status-indicator.soon { background-color: var(--info-color); }
         .status-indicator.normal { background-color: var(--success-color); }
@@ -194,6 +197,11 @@
             margin-right: 10px;
         }
         
+        .unit-select {
+            width: 80px;
+            display: inline-block;
+        }
+        
         .theme-switcher {
             position: fixed;
             bottom: 20px;
@@ -212,9 +220,62 @@
             box-shadow: var(--box-shadow);
             border: none;
         }
+
+        .alert-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1100;
+            animation: slideIn 0.5s forwards, fadeOut 0.5s forwards 4.5s;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+
+        .flash-messages {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1100;
+            width: 100%;
+            max-width: 600px;
+        }
     </style>
 </head>
 <body class="bg-body-tertiary">
+    <!-- Flash Messages -->
+    <div class="flash-messages">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- SMS Alert Notification -->
+    {% if sms_sent %}
+    <div class="alert-notification">
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            <strong>SMS Alert Sent!</strong> Notification for expiring products has been sent.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </div>
+    {% endif %}
+
     <div class="container py-4">
         <!-- Header -->
         <div class="header">
@@ -223,9 +284,17 @@
                     <h1 class="mb-1"><i class="fas fa-boxes me-2"></i>Shop Inventory</h1>
                     <div class="last-updated"><i class="fas fa-sync-alt me-1"></i> Last updated: {{ now }}</div>
                 </div>
-                <div class="text-end">
-                    <div class="badge bg-light text-dark fs-6">
+                <div class="text-end d-flex align-items-center">
+                    <div class="badge bg-light text-dark fs-6 me-2">
                         <i class="fas fa-box-open me-1"></i> {{ total_products }} products
+                    </div>
+                    <div class="btn-group">
+                        <a href="/settings" class="btn btn-outline-light" title="Settings">
+                            <i class="fas fa-cog"></i>
+                        </a>
+                        <a href="/logs" class="btn btn-outline-light ms-1" title="View SMS Logs">
+                            <i class="fas fa-history"></i>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -250,32 +319,46 @@
 
         <!-- Stats Cards -->
         <div class="row mb-4">
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <div class="stat-card">
                     <i class="fas fa-exclamation-triangle"></i>
                     <h5>Expired</h5>
                     <p>{{ products|selectattr('urgency', 'equalto', 'expired')|list|length }}</p>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
+                <div class="stat-card">
+                    <i class="fas fa-fire"></i>
+                    <h5>Critical</h5>
+                    <p>{{ products|selectattr('urgency', 'equalto', 'critical')|list|length }}</p>
+                </div>
+            </div>
+            <div class="col-md-2">
                 <div class="stat-card">
                     <i class="fas fa-clock"></i>
                     <h5>Urgent</h5>
                     <p>{{ products|selectattr('urgency', 'equalto', 'urgent')|list|length }}</p>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <div class="stat-card">
                     <i class="fas fa-calendar-week"></i>
                     <h5>Expiring Soon</h5>
                     <p>{{ products|selectattr('urgency', 'equalto', 'soon')|list|length }}</p>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <div class="stat-card">
                     <i class="fas fa-check-circle"></i>
                     <h5>Normal</h5>
                     <p>{{ products|selectattr('urgency', 'equalto', 'normal')|list|length }}</p>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="stat-card">
+                    <i class="fas fa-bell"></i>
+                    <h5>Alert Days</h5>
+                    <p>{{ settings.alert_days }}</p>
                 </div>
             </div>
         </div>
@@ -291,6 +374,18 @@
                 <div class="col-md-2">
                     <label class="form-label">Quantity</label>
                     <input type="number" name="quantity" class="form-control" min="1" value="1" required>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Unit</label>
+                    <select name="unit" class="form-select" required>
+                        <option value="kg">kg</option>
+                        <option value="g">g</option>
+                        <option value="l">litre</option>
+                        <option value="ml">ml</option>
+                        <option value="pcs">pcs</option>
+                        <option value="box">box</option>
+                        <option value="pack">pack</option>
+                    </select>
                 </div>
                 <div class="col-md-2">
                     <label class="form-label">Current Date</label>
@@ -314,7 +409,7 @@
                 <thead class="table-dark">
                     <tr>
                         <th>Product</th>
-                        <th class="text-center">Qty</th>
+                        <th class="text-center">Quantity</th>
                         <th>Current Date</th>
                         <th>Expiry</th>
                         <th>Status</th>
@@ -341,6 +436,15 @@
                                 <form method="POST" action="/update_quantity/{{ product['id'] }}" class="d-inline">
                                     <input type="number" name="quantity" value="{{ product['quantity'] }}" 
                                            min="0" class="form-control form-control-sm quantity-input">
+                                    <select name="unit" class="form-select form-select-sm unit-select">
+                                        <option value="kg" {% if product['unit'] == 'kg' %}selected{% endif %}>kg</option>
+                                        <option value="g" {% if product['unit'] == 'g' %}selected{% endif %}>g</option>
+                                        <option value="l" {% if product['unit'] == 'l' %}selected{% endif %}>l</option>
+                                        <option value="ml" {% if product['unit'] == 'ml' %}selected{% endif %}>ml</option>
+                                        <option value="pcs" {% if product['unit'] == 'pcs' %}selected{% endif %}>pcs</option>
+                                        <option value="box" {% if product['unit'] == 'box' %}selected{% endif %}>box</option>
+                                        <option value="pack" {% if product['unit'] == 'pack' %}selected{% endif %}>pack</option>
+                                    </select>
                                     <button type="submit" class="btn btn-sm btn-outline-primary">
                                         <i class="fas fa-save"></i>
                                     </button>
@@ -350,6 +454,8 @@
                             <td>{{ product['expiry_formatted'] }}</td>
                             <td>
                                 {% if product['urgency'] == 'expired' %}
+                                    <span class="badge bg-danger">{{ product['status_text'] }}</span>
+                                {% elif product['urgency'] == 'critical' %}
                                     <span class="badge bg-danger">{{ product['status_text'] }}</span>
                                 {% elif product['urgency'] == 'urgent' %}
                                     <span class="badge bg-warning text-dark">{{ product['status_text'] }}</span>
@@ -419,6 +525,15 @@
                 searchInput.focus();
                 searchInput.select();
             }
+            
+            // Auto-dismiss flash messages after 5 seconds
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                setTimeout(() => {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                }, 5000);
+            });
         });
     </script>
 </body>

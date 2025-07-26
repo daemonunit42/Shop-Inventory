@@ -5,15 +5,17 @@
     "quantity": 7,
     "manufacture_date": "2025-07-25",
     "expiry_date": "2025-07-26",
-    "added_date": "2025-07-25"
+    "added_date": "2025-07-25",
+    "unit": "l"
   },
   {
     "id": 5,
     "name": "Curd",
-    "quantity": 5,
+    "quantity": 3,
     "manufacture_date": "2025-07-25",
     "expiry_date": "2025-08-02",
-    "added_date": "2025-07-25"
+    "added_date": "2025-07-25",
+    "unit": "kg"
   },
   {
     "id": 6,
@@ -21,6 +23,68 @@
     "quantity": 25,
     "manufacture_date": "2025-07-25",
     "expiry_date": "2026-04-24",
+    "added_date": "2025-07-25",
+    "unit": "pcs"
+  },
+  {
+    "id": 7,
+    "name": "Wheat Bread",
+    "quantity": 10,
+    "manufacture_date": "2025-07-25",
+    "expiry_date": "2025-07-22",
+    "added_date": "2025-07-25",
+    "unit": "pack"
+  },
+  {
+    "id": 8,
+    "name": "Cut Fruits",
+    "quantity": 27,
+    "manufacture_date": "2025-07-25",
+    "expiry_date": "2025-08-20",
+    "added_date": "2025-07-25",
+    "unit": "pcs"
+  },
+  {
+    "id": 9,
+    "name": "Tofu",
+    "quantity": 30,
+    "manufacture_date": "2025-07-25",
+    "expiry_date": "2025-07-30",
     "added_date": "2025-07-25"
+  },
+  {
+    "id": 10,
+    "name": "Buttermilk",
+    "quantity": 8,
+    "manufacture_date": "2025-07-25",
+    "expiry_date": "2025-08-02",
+    "added_date": "2025-07-25",
+    "unit": "l"
+  },
+  {
+    "id": 11,
+    "name": "chaocobar",
+    "quantity": 3,
+    "manufacture_date": "2025-07-25",
+    "expiry_date": "2025-07-30",
+    "added_date": "2025-07-25"
+  },
+  {
+    "id": 12,
+    "name": "Cup cake",
+    "quantity": 12,
+    "manufacture_date": "2025-07-25",
+    "expiry_date": "2025-07-29",
+    "added_date": "2025-07-25",
+    "unit": "pcs"
+  },
+  {
+    "id": 13,
+    "name": "Battery",
+    "quantity": 10,
+    "unit": "pcs",
+    "manufacture_date": "2025-07-26",
+    "expiry_date": "2026-08-25",
+    "added_date": "2025-07-26"
   }
 ]

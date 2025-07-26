@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="{{ settings.theme }}">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Shop Inventory - SMS Logs</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bs-body-bg);
+        }
+        .logs-container {
+            max-width: 800px;
+            margin: 2rem auto;
+        }
+        .log-entry {
+            border-left: 4px solid;
+            padding-left: 1rem;
+            margin-bottom: 1rem;
+        }
+        .log-success {
+            border-left-color: var(--success-color);
+        }
+        .log-failed {
+            border-left-color: var(--danger-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-4">
+        <div class="logs-container">
+            <h1 class="mb-4"><i class="fas fa-history me-2"></i>SMS Alert Logs</h1>
+            
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-list me-2"></i>Recent Alerts</h5>
+                </div>
+                <div class="card-body">
+                    {% if not logs %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-inbox fa-3x mb-3 text-muted"></i>
+                            <h4>No SMS alerts sent yet</h4>
+                        </div>
+                    {% else %}
+                        {% for log in logs %}
+                        <div class="log-entry {% if 'success' in log.status %}log-success{% else %}log-failed{% endif %}">
+                            <div class="d-flex justify-content-between">
+                                <strong>{{ log.product_name }}</strong>
+                                <small class="text-muted">{{ log.timestamp|datetimeformat }}</small>
+                            </div>
+                            <div>Expiry: {{ log.expiry_date|datetimeformat }}</div>
+                            <div>Status: 
+                                {% if 'success' in log.status %}
+                                    <span class="badge bg-success">Success</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Failed</span>
+                                {% endif %}
+                            </div>
+                            {% if 'failed' in log.status %}
+                                <div class="text-danger small mt-1">{{ log.status }}</div>
+                            {% endif %}
+                            <div class="small text-muted mt-1">Sent to: {{ log.phone_number }}</div>
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="d-flex justify-content-between">
+                <a href="/" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-1"></i> Back to Inventory
+                </a>
+                <a href="/settings" class="btn btn-primary">
+                    <i class="fas fa-cog me-1"></i> Settings
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
