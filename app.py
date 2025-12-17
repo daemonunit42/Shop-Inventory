@@ -23,16 +23,16 @@ DEFAULT_SETTINGS = {
     'items_per_page': 10,
     'sms_alerts': True,
     'alert_days': 3,
-    'phone_number': '+918072329996',
-    'ai_enabled': True,
-    'openrouter_api_key': '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'
+    #'phone_number': '+91Enter Your Mobile Number Here ! ',
+    #'ai_enabled': True,
+    #'openrouter_api_key': 'Get Bot token from the open router model : mistral 7b instruct '
 }
 
 # Twilio configuration
 DEFAULT_CONFIG = {
-    'account_sid': 'AC6733eb83107d7a941592307f25489eea',
-    'auth_token': 'a593dbd3732e1454be235049ff66d78f',
-    'twilio_number': '+13868547912'
+    #'account_sid': 'account sid ',
+    #'auth_token': 'acount auth token',
+    #'twilio_number': 'the twillo number! not your number'
 }
 
 def load_config():
