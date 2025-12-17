@@ -248,6 +248,204 @@
             width: 100%;
             max-width: 600px;
         }
+
+        /* AI Assistant Styles */
+        .ai-assistant-container {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 1050;
+            width: 100px;
+            max-height: 100px;
+            transition: all 0.3s ease;
+        }
+
+        .ai-assistant {
+            background: var(--bs-body-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            transform: translateX(120%);
+            transition: transform 0.3s ease;
+        }
+
+        .ai-assistant.active {
+            transform: translateX(0);
+        }
+
+        .ai-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 12px 15px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .ai-title {
+            font-weight: 600;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .ai-title i {
+            margin-right: 8px;
+        }
+
+        .ai-content {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            max-height: 400px;
+        }
+
+        .ai-messages {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 15px;
+        }
+
+        .ai-message {
+            margin-bottom: 10px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+
+        .ai-message.user {
+            background-color: rgba(67, 97, 238, 0.1);
+            margin-left: auto;
+            border-bottom-right-radius: 0;
+        }
+
+        .ai-message.bot {
+            background-color: rgba(0, 0, 0, 0.05);
+            margin-right: auto;
+            border-bottom-left-radius: 0;
+        }
+
+        .ai-input-container {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .ai-input {
+            flex: 1;
+            border-radius: 20px;
+            padding: 8px 15px;
+            border: 1px solid var(--bs-border-color);
+            outline: none;
+            background: var(--bs-body-bg);
+            color: var(--bs-body-color);
+        }
+
+        .ai-send-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .ai-send-btn:hover {
+            background: var(--secondary-color);
+        }
+
+        .ai-actions {
+            display: flex;
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        .ai-action-btn {
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            border-radius: 20px;
+            background: rgba(67, 97, 238, 0.1);
+            color: var(--primary-color);
+            border: none;
+            cursor: pointer;
+        }
+
+        .ai-action-btn:hover {
+            background: rgba(67, 97, 238, 0.2);
+        }
+
+        .ai-action-btn.danger {
+            background: rgba(247, 37, 133, 0.1);
+            color: var(--danger-color);
+        }
+
+        .ai-action-btn.danger:hover {
+            background: rgba(247, 37, 133, 0.2);
+        }
+
+        .ai-loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(67, 97, 238, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .ai-examples {
+            margin-top: 15px;
+            font-size: 0.8rem;
+            color: var(--bs-secondary-color);
+        }
+
+        .ai-example {
+            margin-bottom: 5px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 4px;
+        }
+
+        .ai-example:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .ai-toggle-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1050;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: var(--box-shadow);
+            border: none;
+        }
+
+        .ai-toggle-btn:hover {
+            background: var(--secondary-color);
+        }
     </style>
 </head>
 <body class="bg-body-tertiary">
@@ -275,6 +473,48 @@
         </div>
     </div>
     {% endif %}
+
+    <!-- AI Assistant Toggle Button -->
+    <button class="ai-toggle-btn" id="aiToggleBtn" title="AI Assistant">
+        <i class="fas fa-robot"></i>
+    </button>
+
+    <!-- AI Assistant Container -->
+    <div class="ai-assistant-container">
+        <div class="ai-assistant" id="aiAssistant">
+            <div class="ai-header">
+                <div class="ai-title">
+                    <i class="fas fa-robot"></i>
+                    <span>Inventory Assistant</span>
+                </div>
+                <i class="fas fa-times" id="aiCloseBtn"></i>
+            </div>
+            <div class="ai-content">
+                <div class="ai-messages" id="aiMessages">
+                    <div class="ai-message bot">
+                        <strong>AI Assistant:</strong> Hello! I can help you manage your inventory. Try saying:
+                        <ul class="mt-2">
+                            <li>"Add 3 eggs manufactured today expiring in 5 days"</li>
+                            <li>"Delete the milk product"</li>
+                            <li>"Show me expiring products"</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="ai-input-container">
+                    <input type="text" class="ai-input" id="aiInput" placeholder="Type your command...">
+                    <button class="ai-send-btn" id="aiSendBtn">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+                <div class="ai-examples">
+                    <small>Try these examples:</small>
+                    <div class="ai-example" onclick="useExample('Add 5 bread manufactured today expiring in 7 days')">Add 5 bread manufactured today expiring in 7 days</div>
+                    <div class="ai-example" onclick="useExample('Delete product ID 3')">Delete product ID 3</div>
+                    <div class="ai-example" onclick="useExample('Show me critical items')">Show me critical items</div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="container py-4">
         <!-- Header -->
@@ -508,7 +748,7 @@
         // Auto-refresh every minute (60,000 ms)
         setTimeout(() => {
             window.location.reload();
-        }, 60000);
+        },60000);
         
         // Add animation to table rows
         document.addEventListener('DOMContentLoaded', function() {
@@ -535,6 +775,176 @@
                 }, 5000);
             });
         });
+
+        // AI Assistant Functions
+        function toggleAiAssistant() {
+            const assistant = document.getElementById('aiAssistant');
+            assistant.classList.toggle('active');
+        }
+
+        function useExample(text) {
+            document.getElementById('aiInput').value = text;
+            document.getElementById('aiInput').focus();
+        }
+
+        function addAiMessage(role, content) {
+            const messagesDiv = document.getElementById('aiMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `ai-message ${role}`;
+            messageDiv.innerHTML = content;
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function showAiLoading() {
+            const btn = document.getElementById('aiSendBtn');
+            btn.innerHTML = '<div class="ai-loading"></div>';
+            btn.disabled = true;
+        }
+
+        function hideAiLoading() {
+            const btn = document.getElementById('aiSendBtn');
+            btn.innerHTML = '<i class="fas fa-paper-plane"></i>';
+            btn.disabled = false;
+        }
+
+        // Initialize AI Assistant
+        document.getElementById('aiToggleBtn').addEventListener('click', toggleAiAssistant);
+        document.getElementById('aiCloseBtn').addEventListener('click', toggleAiAssistant);
+
+        // Handle AI commands
+        document.getElementById('aiSendBtn').addEventListener('click', handleAiCommand);
+        document.getElementById('aiInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                handleAiCommand();
+            }
+        });
+
+        function handleAiCommand() {
+            const input = document.getElementById('aiInput');
+            const command = input.value.trim();
+            
+            if (!command) return;
+            
+            addAiMessage('user', `<strong>You:</strong> ${command}`);
+            input.value = '';
+            showAiLoading();
+            
+            fetch('/ai_command', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `command=${encodeURIComponent(command)}`
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.error) {
+                    addAiMessage('bot', `<strong>AI Assistant:</strong> Error: ${data.error}`);
+                    return;
+                }
+                
+                if (data.action) {
+                    // Handle actionable responses
+                    let actionHtml = `<strong>AI Assistant:</strong> ${data.response}`;
+                    
+                    if (data.action === 'add') {
+                        actionHtml += `
+                            <div class="ai-actions mt-2">
+                                <button class="ai-action-btn" onclick="executeAiAction('add', ${JSON.stringify(data.product).replace(/"/g, '&quot;')})">
+                                    <i class="fas fa-check me-1"></i> Confirm Add
+                                </button>
+                                <button class="ai-action-btn danger" onclick="addAiMessage('bot', '<strong>AI Assistant:</strong> Addition cancelled')">
+                                    <i class="fas fa-times me-1"></i> Cancel
+                                </button>
+                            </div>
+                        `;
+                    } else if (data.action === 'delete') {
+                        actionHtml += `
+                            <div class="ai-actions mt-2">
+                                <button class="ai-action-btn danger" onclick="executeAiAction('delete', ${data.product_id})">
+                                    <i class="fas fa-trash me-1"></i> Confirm Delete
+                                </button>
+                                <button class="ai-action-btn" onclick="addAiMessage('bot', '<strong>AI Assistant:</strong> Deletion cancelled')">
+                                    <i class="fas fa-times me-1"></i> Cancel
+                                </button>
+                            </div>
+                        `;
+                    } else if (data.action === 'update') {
+                        actionHtml += `
+                            <div class="ai-actions mt-2">
+                                <button class="ai-action-btn" onclick="executeAiAction('update', ${data.product_id}, ${JSON.stringify(data.updates).replace(/"/g, '&quot;')})">
+                                    <i class="fas fa-save me-1"></i> Confirm Update
+                                </button>
+                                <button class="ai-action-btn" onclick="addAiMessage('bot', '<strong>AI Assistant:</strong> Update cancelled')">
+                                    <i class="fas fa-times me-1"></i> Cancel
+                                </button>
+                            </div>
+                        `;
+                    }
+                    
+                    addAiMessage('bot', actionHtml);
+                } else {
+                    // Regular response
+                    addAiMessage('bot', `<strong>AI Assistant:</strong> ${data.response}`);
+                }
+            })
+            .catch(error => {
+                addAiMessage('bot', `<strong>AI Assistant:</strong> Error processing your request: ${error.message}`);
+            })
+            .finally(() => {
+                hideAiLoading();
+            });
+        }
+
+        function executeAiAction(action, productId, updates = null) {
+            showAiLoading();
+            
+            let formData = new FormData();
+            formData.append('action', action);
+            
+            if (action === 'add') {
+                for (const [key, value] of Object.entries(productId)) {
+                    formData.append(key, value);
+                }
+            } else if (action === 'delete') {
+                formData.append('product_id', productId);
+            } else if (action === 'update') {
+                formData.append('product_id', productId);
+                formData.append('updates', JSON.stringify(updates));
+            }
+            
+            fetch('/execute_ai_action', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    addAiMessage('bot', `<strong>AI Assistant:</strong> ${data.message}`);
+                    // Refresh the page to show changes
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    addAiMessage('bot', `<strong>AI Assistant:</strong> Action failed: ${data.message}`);
+                }
+            })
+            .catch(error => {
+                addAiMessage('bot', `<strong>AI Assistant:</strong> Error executing action: ${error.message}`);
+            })
+            .finally(() => {
+                hideAiLoading();
+            });
+        }
     </script>
 </body>
 </html>

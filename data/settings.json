@@ -3,5 +3,7 @@
   "items_per_page": 10,
   "sms_alerts": true,
   "alert_days": 3,
-  "phone_number": "+917397423848"
+  "phone_number": "+917397423848",
+  "ai_enabled": true,
+  "openrouter_api_key": "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"
 }

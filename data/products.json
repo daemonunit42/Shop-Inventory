@@ -53,15 +53,6 @@
     "added_date": "2025-07-25"
   },
   {
-    "id": 10,
-    "name": "Buttermilk",
-    "quantity": 8,
-    "manufacture_date": "2025-07-25",
-    "expiry_date": "2025-08-02",
-    "added_date": "2025-07-25",
-    "unit": "l"
-  },
-  {
     "id": 11,
     "name": "chaocobar",
     "quantity": 3,
@@ -86,5 +77,59 @@
     "manufacture_date": "2025-07-26",
     "expiry_date": "2026-08-25",
     "added_date": "2025-07-26"
+  },
+  {
+    "id": 14,
+    "name": "Daniel Raj",
+    "quantity": 1,
+    "unit": "pcs",
+    "manufacture_date": "2025-07-28",
+    "expiry_date": "2025-08-27",
+    "added_date": "2025-07-28"
+  },
+  {
+    "id": 15,
+    "name": "milk",
+    "quantity": 2,
+    "unit": "l",
+    "manufacture_date": "2025-07-28",
+    "expiry_date": "2025-08-27",
+    "added_date": "2025-07-28"
+  },
+  {
+    "id": 16,
+    "name": "daniel raj",
+    "quantity": 1,
+    "unit": "kg",
+    "manufacture_date": "2025-07-28",
+    "expiry_date": "2025-08-27",
+    "added_date": "2025-07-28"
+  },
+  {
+    "id": 17,
+    "name": "pamner",
+    "quantity": 1,
+    "unit": "kg",
+    "manufacture_date": "2025-07-28",
+    "expiry_date": "2025-08-27",
+    "added_date": "2025-07-28"
+  },
+  {
+    "id": 18,
+    "name": "maggi",
+    "quantity": 2,
+    "unit": "pack",
+    "manufacture_date": "2025-08-09",
+    "expiry_date": "2025-09-08",
+    "added_date": "2025-08-09"
+  },
+  {
+    "id": 19,
+    "name": "yippe",
+    "quantity": 9,
+    "unit": "pack",
+    "manufacture_date": "2025-08-09",
+    "expiry_date": "2026-01-08",
+    "added_date": "2025-08-09"
   }
 ]
