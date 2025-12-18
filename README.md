@@ -100,5 +100,5 @@ For production use, **API keys and secrets must be stored securely** using envir
 ---
 
 <p align="center">
-  <b>Built with curiosity, automation, and a futuristic mindset ⚡</b>
+  <b>Powering Young Brain's</b>
 </p>
