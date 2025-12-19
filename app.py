@@ -5,6 +5,12 @@ import os
 import requests
 from pathlib import Path
 from twilio.rest import Client
+import numpy as np
+import cv2
+
+# ... inside detect_item function ...
+
+# Convert PIL Image to NumPy array (BGR for OpenCV/EasyOCR)
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key_here'   
@@ -609,6 +615,219 @@ def execute_ai_action():
         return jsonify({'success': False, 'message': 'Invalid action'}), 400
     except Exception as e:
         return jsonify({'success': False, 'message': f"Error executing action: {str(e)}"}), 500
+    
 
+# ADD THIS NEW ROUTE (after @app.route('/execute_ai_action'))
+
+
+@app.route('/detect_item', methods=['POST'])
+def detect_item():
+    try:
+        import base64
+        import easyocr
+        import cv2
+        import numpy as np
+        import re
+
+        # Get image from frontend
+        image_data = request.json['image'].split(',')[1]
+        image_bytes = base64.b64decode(image_data)
+        nparr = np.frombuffer(image_bytes, np.uint8)
+        frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+
+        if frame is None:
+            return jsonify({'error': 'Invalid image'}), 400
+
+        # Load EasyOCR once (cached)
+        if not hasattr(detect_item, "reader"):
+            detect_item.reader = easyocr.Reader(['en'], gpu=False)  # Add 'hi','fr' etc. if needed
+
+        reader = detect_item.reader
+
+        # === STRONG BUT FAST PREPROCESSING ===
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8,8))
+        contrast = clahe.apply(gray)
+        denoised = cv2.fastNlMeansDenoising(contrast, h=10)
+        sharpen_kernel = np.array([[-1,-1,-1], [-1,9,-1], [-1,-1,-1]])
+        sharpened = cv2.filter2D(denoised, -1, sharpen_kernel)
+        preprocessed = cv2.resize(sharpened, None, fx=1.5, fy=1.5, interpolation=cv2.INTER_LINEAR)
+
+        # === RUN OCR ===
+        ocr_results = reader.readtext(
+            preprocessed,
+            paragraph=False,
+            width_ths=0.8,
+            height_ths=0.8,
+            text_threshold=0.6
+        )
+
+        # Get all text with decent confidence
+        texts = [text for (_, text, prob) in ocr_results if prob > 0.5]
+
+        if not texts:
+            return jsonify({
+                'name': '',
+                'message': 'No text detected — try better lighting or closer photo'
+            })
+
+        # Combine all detected text into one clean name
+        detected_name = " ".join(texts)
+        detected_name = re.sub(r'\s+', ' ', detected_name).strip()  # Remove extra spaces
+
+        # Optional: Uppercase or clean common OCR mistakes
+        # detected_name = detected_name.upper()
+        # detected_name = detected_name.replace('0', 'O').replace('1', 'I')
+
+        return jsonify({
+            'name': detected_name,
+            'message': 'Detected successfully'
+        })
+
+    except Exception as e:
+        print("OCR Error:", e)
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': 'Detection failed', 'details': str(e)}), 500
+    try:
+        import base64
+        import easyocr
+        import cv2
+        import numpy as np
+
+        # Get base64 image from frontend
+        image_data = request.json['image'].split(',')[1]
+        image_bytes = base64.b64decode(image_data)
+        nparr = np.frombuffer(image_bytes, np.uint8)
+        frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+
+        if frame is None:
+            return jsonify({'error': 'Invalid image'}), 400
+
+        # Load EasyOCR reader once and reuse
+        if not hasattr(detect_item, "reader"):
+            detect_item.reader = easyocr.Reader(['en'], gpu=False)  # Add more langs if needed, e.g. ['en','hi']
+
+        reader = detect_item.reader
+
+        # === FAST & EFFECTIVE PREPROCESSING ===
+        # 1. Convert to grayscale
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+        # 2. Boost contrast with CLAHE (great for text on packaging)
+        clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8,8))
+        contrast = clahe.apply(gray)
+
+        # 3. Light denoising to reduce JPEG noise
+        denoised = cv2.fastNlMeansDenoising(contrast, h=10)
+
+        # 4. Sharpen to make text bolder and clearer
+        sharpen_kernel = np.array([[-1,-1,-1],
+                                   [-1, 9,-1],
+                                   [-1,-1,-1]])
+        sharpened = cv2.filter2D(denoised, -1, sharpen_kernel)
+
+        # Optional: Upscale slightly for small text (helps a lot, still fast)
+        preprocessed = cv2.resize(sharpened, None, fx=1.5, fy=1.5, interpolation=cv2.INTER_LINEAR)
+
+        # === RUN OCR ===
+        ocr_results = reader.readtext(
+            preprocessed,
+            paragraph=False,           # Get individual text lines
+            width_ths=0.8,             # Helps connect broken characters
+            height_ths=0.8,
+            text_threshold=0.6         # Lower a bit to catch faint text
+        )
+
+        # Extract text with confidence filter
+        texts = [text for (_, text, prob) in ocr_results if prob > 0.5]
+
+        # Combine into one string (you can customize this logic later)
+        if texts:
+            # Join all detected text — often gives good product name + price + expiry
+            detected_name = " ".join(texts).strip()
+
+            # Optional: Clean up common noise (e.g. multiple spaces, weird chars)
+            import re
+            detected_name = re.sub(r'\s+', ' ', detected_name).strip()
+        else:
+            detected_name = "No text detected"
+
+        return jsonify({
+            'name': detected_name,
+            'confidence': 1.0,  # We don't have YOLO conf anymore
+            'box': None         # No bounding box since no detection
+        })
+
+    except Exception as e:
+        print("Detection error:", e)
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+    try:
+        from ultralytics import YOLO
+        import base64
+        import easyocr
+
+        # Get base64 image from frontend (data URL format: data:image/jpeg;base64,...)
+        image_data = request.json['image'].split(',')[1]
+        image_bytes = base64.b64decode(image_data)
+        nparr = np.frombuffer(image_bytes, np.uint8)
+        frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+
+        if frame is None:
+            return jsonify({'error': 'Invalid image'}), 400
+
+        # Load models once and reuse (cached on function)
+        if not hasattr(detect_item, "model"):
+            detect_item.model = YOLO('yolov8n.pt')  # Make sure yolov8n.pt is in the folder
+            detect_item.reader = easyocr.Reader(['en'], gpu=False)  # English, CPU
+
+        model = detect_item.model
+        reader = detect_item.reader
+
+        # Run YOLO detection
+        results = model(frame, conf=0.4)[0]
+
+        detected_name = "Unknown Item"
+        confidence = 0.0
+        box = None
+
+        if len(results.boxes) > 0:
+            # Get the most confident detection
+            top_idx = results.boxes.conf.argmax()
+            cls_id = int(results.boxes.cls[top_idx])
+            confidence = float(results.boxes.conf[top_idx])
+            detected_name = results.names[cls_id]
+
+            # Get bounding box
+            box_xyxy = results.boxes.xyxy[top_idx].cpu().numpy()
+            x1, y1, x2, y2 = map(int, box_xyxy)
+
+            box = [x1, y1, x2, y2]
+
+            # Crop the detected item for better OCR on label/text
+            crop = frame[y1:y2, x1:x2]
+
+            # EasyOCR works directly with NumPy BGR arrays → no conversion needed!
+            ocr_results = reader.readtext(crop, paragraph=False)
+
+            ocr_text = " ".join([text for _, text, prob in ocr_results]) if ocr_results else ""
+
+            # If OCR finds readable text (like product name on label), use it
+            if ocr_text.strip():
+                detected_name = ocr_text.strip()
+
+        return jsonify({
+            'name': detected_name,
+            'confidence': round(confidence, 2),
+            'box': box
+        })
+
+    except Exception as e:
+        print("Detection error:", e)
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

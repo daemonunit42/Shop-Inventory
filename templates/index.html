@@ -604,44 +604,71 @@
         </div>
 
         <!-- Add Product Form -->
-        <div class="form-container">
-            <h3 class="mb-4"><i class="fas fa-plus-circle me-2"></i>Add New Product</h3>
-            <form method="POST" action="/add" class="row g-3">
-                <div class="col-md-4">
-                    <label class="form-label">Product Name</label>
-                    <input type="text" name="name" class="form-control" placeholder="Enter product name" required>
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label">Quantity</label>
-                    <input type="number" name="quantity" class="form-control" min="1" value="1" required>
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label">Unit</label>
-                    <select name="unit" class="form-select" required>
-                        <option value="kg">kg</option>
-                        <option value="g">g</option>
-                        <option value="l">litre</option>
-                        <option value="ml">ml</option>
-                        <option value="pcs">pcs</option>
-                        <option value="box">box</option>
-                        <option value="pack">pack</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label">Current Date</label>
-                    <input type="date" name="manufacture_date" class="form-control" required>
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label">Expiry Date</label>
-                    <input type="date" name="expiry_date" class="form-control" required>
-                </div>
-                <div class="col-md-2 d-flex align-items-end">
-                    <button type="submit" class="btn btn-primary w-100">
-                        <i class="fas fa-plus me-1"></i> Add
-                    </button>
-                </div>
-            </form>
-        </div>
+        <form id="addProductForm" class="row g-3">
+    <div class="col-md-4">
+        <label class="form-label">Product Name</label>
+        <input type="text" name="name" class="form-control" placeholder="Enter product name" required>
+    </div>
+    <div class="col-md-2">
+        <label class="form-label">Quantity</label>
+        <input type="number" name="quantity" class="form-control" min="1" value="1" required>
+    </div>
+    <div class="col-md-2">
+        <label class="form-label">Unit</label>
+        <select name="unit" class="form-select" required>
+            <option value="kg">kg</option>
+            <option value="g">g</option>
+            <option value="l">litre</option>
+            <option value="ml">ml</option>
+            <option value="pcs" selected>pcs</option>
+            <option value="box">box</option>
+            <option value="pack">pack</option>
+        </select>
+    </div>
+    <div class="col-md-2">
+        <label class="form-label">Current Date</label>
+        <input type="date" name="manufacture_date" class="form-control" required>
+    </div>
+    <div class="col-md-2">
+        <label class="form-label">Expiry Date</label>
+        <input type="date" name="expiry_date" class="form-control" required>
+    </div>
+    <div class="col-md-2 d-flex align-items-end">
+        <button type="submit" class="btn btn-primary w-100">
+            <i class="fas fa-plus me-1"></i> Add
+        </button>
+    </div>
+</form>
+
+        <!-- Replace the entire last column of the add form -->
+<div class="col-md-3 d-flex flex-column">
+    <div class="mb-3">
+        <button type="button" id="startCameraBtn" class="btn btn-success w-100">
+            <i class="fas fa-video me-2"></i> Start Live Detection
+        </button>
+        <button type="button" id="stopCameraBtn" class="btn btn-danger w-100 mt-2 d-none">
+            <i class="fas fa-stop me-2"></i> Stop Camera
+        </button>
+    </div>
+
+    <!-- Live Preview with Overlay -->
+    <!-- Live Preview with Overlay -->
+<div id="cameraContainer" class="position-relative rounded overflow-hidden shadow border d-none" 
+     style="max-width: 640px; width: 100%; margin: 0 auto; aspect-ratio: 4/3; background: #000;">
+    <video id="videoPreview" autoplay playsinline muted 
+           style="width: 100%; height: 100%; object-fit: cover;"></video>
+    <canvas id="overlayCanvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></canvas>
+    
+    <div id="detectionLabel" class="position-absolute bottom-0 start-50 translate-middle-x mb-3 px-4 py-2 rounded-pill text-white fw-bold shadow" 
+         style="background: rgba(67, 97, 238, 0.9); font-size: 1.2rem; display: none;">
+        Detecting...
+    </div>
+</div>
+
+    <div id="statusText" class="text-center mt-2 text-muted small">
+        Point camera at product label
+    </div>
+</div>
 
         <!-- Products Table -->
         <div class="table-responsive">
@@ -737,214 +764,211 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- Auto-fill & Refresh Logic -->
-    <script>
-        // Set default dates
-        document.querySelector('input[name="manufacture_date"]').valueAsDate = new Date();
-        
-        const expiryDate = new Date();
-        expiryDate.setDate(expiryDate.getDate() + 30);
-        document.querySelector('input[name="expiry_date"]').valueAsDate = expiryDate;
 
-        // Auto-refresh every minute (60,000 ms)
-        setTimeout(() => {
-            window.location.reload();
-        },60000);
-        
-        // Add animation to table rows
-        document.addEventListener('DOMContentLoaded', function() {
-            const rows = document.querySelectorAll('tbody tr');
-            rows.forEach((row, index) => {
-                setTimeout(() => {
-                    row.style.opacity = '1';
-                }, index * 50);
-            });
-            
-            // Focus search field if it has value
-            const searchInput = document.querySelector('input[name="search"]');
-            if (searchInput && searchInput.value) {
-                searchInput.focus();
-                searchInput.select();
-            }
-            
-            // Auto-dismiss flash messages after 5 seconds
-            const alerts = document.querySelectorAll('.alert');
-            alerts.forEach(alert => {
-                setTimeout(() => {
-                    const bsAlert = new bootstrap.Alert(alert);
-                    bsAlert.close();
-                }, 5000);
-            });
+
+
+  
+<script>
+    let videoStream = null;
+    const video = document.getElementById('videoPreview');
+    const canvas = document.getElementById('overlayCanvas');
+    const ctx = canvas.getContext('2d');
+    const detectionLabel = document.getElementById('detectionLabel');
+    const statusText = document.getElementById('statusText');
+    const startBtn = document.getElementById('startCameraBtn');
+    const stopBtn = document.getElementById('stopCameraBtn');
+    const container = document.getElementById('cameraContainer');
+
+    // New: Detect Button (replaces live loop)
+    const detectBtn = document.createElement('button');
+    detectBtn.type = 'button';
+    detectBtn.className = 'btn btn-primary w-100 mt-2';
+    detectBtn.innerHTML = '<i class="fas fa-search me-2"></i> Detect Component Now';
+    detectBtn.style.display = 'none'; // Hidden until camera starts
+
+    // Insert Detect button below Stop button
+    stopBtn.parentNode.appendChild(detectBtn);
+
+    startBtn.addEventListener('click', startCamera);
+    stopBtn.addEventListener('click', stopCamera);
+    detectBtn.addEventListener('click', performSingleDetection);
+
+    // AJAX Add Product - prevents page reload
+document.getElementById('addProductForm')?.addEventListener('submit', async function(e) {
+    e.preventDefault(); // Stop page reload
+
+    const formData = new FormData(this);
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Adding...';
+    submitBtn.disabled = true;
+
+    try {
+        const response = await fetch('/add', {
+            method: 'POST',
+            body: formData
         });
 
-        // AI Assistant Functions
-        function toggleAiAssistant() {
-            const assistant = document.getElementById('aiAssistant');
-            assistant.classList.toggle('active');
+        if (response.redirected) {
+            // Flask did a redirect → success
+            alert('Product added successfully!');
+            this.reset(); // Clear form
+            // Re-set default dates
+            const todayStr = new Date().toISOString().split('T')[0];
+            this.querySelector('input[name="manufacture_date"]').value = todayStr;
+            const expiry = new Date();
+            expiry.setDate(expiry.getDate() + 30);
+            this.querySelector('input[name="expiry_date"]').value = expiry.toISOString().split('T')[0];
+
+            // Optional: refresh only the table via another endpoint later
+        } else {
+            const data = await response.text();
+            alert('Error adding product: ' + data);
         }
+    } catch (err) {
+        alert('Network error');
+        console.error(err);
+    } finally {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    }
+});
 
-        function useExample(text) {
-            document.getElementById('aiInput').value = text;
-            document.getElementById('aiInput').focus();
-        }
-
-        function addAiMessage(role, content) {
-            const messagesDiv = document.getElementById('aiMessages');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `ai-message ${role}`;
-            messageDiv.innerHTML = content;
-            messagesDiv.appendChild(messageDiv);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-        }
-
-        function showAiLoading() {
-            const btn = document.getElementById('aiSendBtn');
-            btn.innerHTML = '<div class="ai-loading"></div>';
-            btn.disabled = true;
-        }
-
-        function hideAiLoading() {
-            const btn = document.getElementById('aiSendBtn');
-            btn.innerHTML = '<i class="fas fa-paper-plane"></i>';
-            btn.disabled = false;
-        }
-
-        // Initialize AI Assistant
-        document.getElementById('aiToggleBtn').addEventListener('click', toggleAiAssistant);
-        document.getElementById('aiCloseBtn').addEventListener('click', toggleAiAssistant);
-
-        // Handle AI commands
-        document.getElementById('aiSendBtn').addEventListener('click', handleAiCommand);
-        document.getElementById('aiInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                handleAiCommand();
-            }
-        });
-
-        function handleAiCommand() {
-            const input = document.getElementById('aiInput');
-            const command = input.value.trim();
-            
-            if (!command) return;
-            
-            addAiMessage('user', `<strong>You:</strong> ${command}`);
-            input.value = '';
-            showAiLoading();
-            
-            fetch('/ai_command', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: `command=${encodeURIComponent(command)}`
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.error) {
-                    addAiMessage('bot', `<strong>AI Assistant:</strong> Error: ${data.error}`);
-                    return;
-                }
-                
-                if (data.action) {
-                    // Handle actionable responses
-                    let actionHtml = `<strong>AI Assistant:</strong> ${data.response}`;
-                    
-                    if (data.action === 'add') {
-                        actionHtml += `
-                            <div class="ai-actions mt-2">
-                                <button class="ai-action-btn" onclick="executeAiAction('add', ${JSON.stringify(data.product).replace(/"/g, '&quot;')})">
-                                    <i class="fas fa-check me-1"></i> Confirm Add
-                                </button>
-                                <button class="ai-action-btn danger" onclick="addAiMessage('bot', '<strong>AI Assistant:</strong> Addition cancelled')">
-                                    <i class="fas fa-times me-1"></i> Cancel
-                                </button>
-                            </div>
-                        `;
-                    } else if (data.action === 'delete') {
-                        actionHtml += `
-                            <div class="ai-actions mt-2">
-                                <button class="ai-action-btn danger" onclick="executeAiAction('delete', ${data.product_id})">
-                                    <i class="fas fa-trash me-1"></i> Confirm Delete
-                                </button>
-                                <button class="ai-action-btn" onclick="addAiMessage('bot', '<strong>AI Assistant:</strong> Deletion cancelled')">
-                                    <i class="fas fa-times me-1"></i> Cancel
-                                </button>
-                            </div>
-                        `;
-                    } else if (data.action === 'update') {
-                        actionHtml += `
-                            <div class="ai-actions mt-2">
-                                <button class="ai-action-btn" onclick="executeAiAction('update', ${data.product_id}, ${JSON.stringify(data.updates).replace(/"/g, '&quot;')})">
-                                    <i class="fas fa-save me-1"></i> Confirm Update
-                                </button>
-                                <button class="ai-action-btn" onclick="addAiMessage('bot', '<strong>AI Assistant:</strong> Update cancelled')">
-                                    <i class="fas fa-times me-1"></i> Cancel
-                                </button>
-                            </div>
-                        `;
-                    }
-                    
-                    addAiMessage('bot', actionHtml);
-                } else {
-                    // Regular response
-                    addAiMessage('bot', `<strong>AI Assistant:</strong> ${data.response}`);
-                }
-            })
-            .catch(error => {
-                addAiMessage('bot', `<strong>AI Assistant:</strong> Error processing your request: ${error.message}`);
-            })
-            .finally(() => {
-                hideAiLoading();
+    async function startCamera() {
+        try {
+            videoStream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: 'environment' } // Use rear camera on mobile
             });
-        }
 
-        function executeAiAction(action, productId, updates = null) {
-            showAiLoading();
-            
-            let formData = new FormData();
-            formData.append('action', action);
-            
-            if (action === 'add') {
-                for (const [key, value] of Object.entries(productId)) {
-                    formData.append(key, value);
-                }
-            } else if (action === 'delete') {
-                formData.append('product_id', productId);
-            } else if (action === 'update') {
-                formData.append('product_id', productId);
-                formData.append('updates', JSON.stringify(updates));
-            }
-            
-            fetch('/execute_ai_action', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    addAiMessage('bot', `<strong>AI Assistant:</strong> ${data.message}`);
-                    // Refresh the page to show changes
-                    setTimeout(() => window.location.reload(), 1000);
-                } else {
-                    addAiMessage('bot', `<strong>AI Assistant:</strong> Action failed: ${data.message}`);
-                }
-            })
-            .catch(error => {
-                addAiMessage('bot', `<strong>AI Assistant:</strong> Error executing action: ${error.message}`);
-            })
-            .finally(() => {
-                hideAiLoading();
+            video.srcObject = videoStream;
+            video.play();
+
+            // Show UI
+            container.classList.remove('d-none');
+            startBtn.classList.add('d-none');
+            stopBtn.classList.remove('d-none');
+            detectBtn.style.display = 'block'; // Show detect button
+
+            statusText.textContent = "Camera ready — point at component label and tap Detect";
+
+            video.addEventListener('loadedmetadata', () => {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
             });
+
+            // Just show live preview — no OCR loop
+            requestAnimationFrame(previewLoop);
+
+        } catch (err) {
+            alert("Camera access denied. Please allow camera access and use HTTPS or localhost.");
+            console.error(err);
         }
-    </script>
+    }
+
+    function previewLoop() {
+        if (videoStream && video.readyState === video.HAVE_ENOUGH_DATA) {
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        }
+        if (videoStream) requestAnimationFrame(previewLoop);
+    }
+
+    function stopCamera() {
+        if (videoStream) {
+            videoStream.getTracks().forEach(track => track.stop());
+            videoStream = null;
+        }
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        detectionLabel.style.display = 'none';
+        statusText.textContent = "Camera stopped";
+        container.classList.add('d-none');
+        startBtn.classList.remove('d-none');
+        stopBtn.classList.add('d-none');
+        detectBtn.style.display = 'none';
+    }
+
+    async function performSingleDetection() {
+        if (!videoStream) return;
+
+        detectBtn.disabled = true;
+        detectBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Detecting...';
+        statusText.textContent = "Processing image...";
+        detectionLabel.textContent = "Analyzing...";
+        detectionLabel.style.display = 'block';
+
+        // Capture current frame
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const imageData = canvas.toDataURL('image/jpeg', 0.8);
+
+        try {
+            const response = await fetch('/detect_item', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image: imageData })
+            });
+
+            const data = await response.json();
+
+            if (data.name && data.name.trim()) {
+                const productName = data.name.trim();
+
+                // Auto-fill the Product Name field
+                const nameInput = document.querySelector('input[name="name"]');
+                if (nameInput) {
+                    nameInput.value = productName;
+                    nameInput.focus();
+                }
+
+                detectionLabel.textContent = productName;
+                statusText.textContent = `Detected: "${productName}" → Name filled! Enter quantity and add.`;
+
+                // Play success sound
+                const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-bell-notification-933.mp3');
+                audio.play().catch(() => {});
+
+                // Flash success style
+                detectionLabel.style.background = 'rgba(40, 167, 69, 0.9)';
+                setTimeout(() => {
+                    detectionLabel.style.background = 'rgba(67, 97, 238, 0.9)';
+                }, 2000);
+
+            } else {
+                detectionLabel.textContent = "No text found";
+                statusText.textContent = data.message || "No readable text — try closer/better lighting";
+                detectionLabel.style.background = 'rgba(220, 53, 69, 0.9)';
+                setTimeout(() => {
+                    detectionLabel.style.background = 'rgba(67, 97, 238, 0.9)';
+                }, 2000);
+            }
+
+        } catch (err) {
+            console.error("Detection failed:", err);
+            statusText.textContent = "Detection error — check connection";
+            detectionLabel.textContent = "Error";
+        } finally {
+            detectBtn.disabled = false;
+            detectBtn.innerHTML = '<i class="fas fa-search me-2"></i> Detect Again';
+        }
+    }
+
+    // === REST OF YOUR EXISTING SCRIPT (keep everything below this) ===
+    // Set default dates
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+    
+    const manufactureInput = document.querySelector('input[name="manufacture_date"]');
+    const expiryInput = document.querySelector('input[name="expiry_date"]');
+    
+    if (manufactureInput) manufactureInput.value = todayStr;
+    if (expiryInput) {
+        const expiry = new Date(today);
+        expiry.setDate(expiry.getDate() + 30);
+        expiryInput.value = expiry.toISOString().split('T')[0];
+    }
+
+    // Auto-refresh every minute
+    setTimeout(() => location.reload(), 60000);
+
+    // ... (keep all your AI assistant code, theme switcher, etc.)
+</script>
 </body>
 </html>

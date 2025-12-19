@@ -1,0 +1,29 @@
+# Virtual environments
+venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env.bak/
+venv.bak/
+
+# Flask
+instance/
+.webassets-cache
+
+# Data files (don't commit personal inventory)
+data/products.json
+data/settings.json
+data/config.json
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
