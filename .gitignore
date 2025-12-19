@@ -27,3 +27,7 @@ data/config.json
 # OS
 .DS_Store
 Thumbs.db
+*.pt
+yolov8*.pt
+yolo*.pt
+*.pt
