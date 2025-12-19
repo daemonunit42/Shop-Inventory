@@ -1,0 +1,6 @@
+Flask==3.0.3
+easyocr==1.7.1
+opencv-python==4.10.0.84
+numpy==2.0.2
+requests==2.32.3
+twilio==9.3.2
